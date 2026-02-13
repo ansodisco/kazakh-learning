@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Сөз Сайыс — Ultimate Translation Battle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Noto+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <!-- PeerJS: Try local first, fallback to CDN -->
+    <script src="peerjs.min.js"></script>
+    <script>
+        if (!window.Peer) {
+            document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>');
+        }
+    </script>
+    <style>
+        /* A more organic, human-made design with hand-drawn elements and playful touches */
+        :root {
+            --cream-bg: #faf8f3;
+            --paper-white: #ffffff;
+            --ink-dark: #2a2a2a;
+            --ink-medium: #5a5a5a;
+            --ink-light: #8a8a8a;
+            --accent-blue: #4a7c9e;
+            --accent-warm: #d17a4a;
+            --accent-green: #6b9e7a;
+            --accent-red: #c55a5a;
+            --accent-purple: #9b6b9e;
+            --accent-yellow: #e8b55d;
+            --accent-pink: #d86b8a;
+            --accent-teal: #5a9e8e;
+            --border-sketch: #d4d0c8;
+            --shadow-soft: rgba(0, 0, 0, 0.08);
+            --main-font: 'Outfit', sans-serif;
+            --secondary-font: 'Noto Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: var(--main-font);
+            background: var(--cream-bg);
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.015) 2px, rgba(0, 0, 0, 0.015) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, 0.015) 2px, rgba(0, 0, 0, 0.015) 4px);
+            color: var(--ink-dark);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Organic background shapes - more irregular */
+        .bg-orb {
+            position: absolute;
+            border-radius: 48% 52% 55% 45% / 45% 58% 42% 55%;
+            opacity: 0.12;
+            z-index: -1;
+            filter: blur(60px);
+            animation: blob-morph 25s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 55vw;
+            height: 48vw;
+            top: -15%;
+            left: -18%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+        }
+
+        .orb-2 {
+            width: 42vw;
+            height: 52vw;
+            bottom: -12%;
+            right: -15%;
+            background: linear-gradient(225deg, var(--accent-yellow), var(--accent-warm));
+            animation-delay: -8s;
+        }
+
+        .orb-3 {
+            width: 38vw;
+            height: 35vw;
+            top: 30%;
+            left: 55%;
+            background: linear-gradient(45deg, var(--accent-teal), var(--accent-blue));
+            animation-delay: -16s;
+        }
+
+        @keyframes blob-morph {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                border-radius: 48% 52% 55% 45% / 45% 58% 42% 55%;
+            }
+
+            25% {
+                transform: translate(20px, -15px) scale(1.05) rotate(5deg);
+                border-radius: 52% 48% 45% 55% / 58% 42% 55% 45%;
+            }
+
+            50% {
+                transform: translate(-10px, 25px) scale(0.98) rotate(-3deg);
+                border-radius: 45% 55% 52% 48% / 42% 55% 45% 58%;
+            }
+
+            75% {
+                transform: translate(15px, 10px) scale(1.02) rotate(8deg);
+                border-radius: 55% 45% 48% 52% / 55% 45% 58% 42%;
+            }
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            padding: 25px;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Card with hand-drawn feel */
+        .card {
+            background: var(--paper-white);
+            border-radius: 8px;
+            padding: 40px 35px;
+            border: 1px solid var(--border-sketch);
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.06),
+                0 8px 24px rgba(0, 0, 0, 0.04);
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink), var(--accent-yellow), var(--accent-teal));
+            border-radius: 9px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Decorative corner marks */
+        .card::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--accent-teal);
+            opacity: 0.4;
+            bottom: 12px;
+            right: 12px;
+            border-left: none;
+            border-top: none;
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 15%;
+            width: 70%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink), var(--accent-yellow));
+            border-radius: 2px;
+            opacity: 0.5;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: var(--ink-medium);
+            margin-bottom: 28px;
+            font-weight: 500;
+            font-family: var(--secondary-font);
+            font-style: italic;
+        }
+
+        /* Input groups */
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 700;
+            display: block;
+            color: var(--ink-medium);
+            font-size: 0.75rem;
+            margin-bottom: 6px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            font-family: var(--secondary-font);
+        }
+
+        input {
+            padding: 14px 16px;
+            width: 100%;
+            background: var(--paper-white);
+            border: 1.5px solid var(--border-sketch);
+            color: var(--ink-dark);
+            border-radius: 6px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.2s;
+            font-family: var(--main-font);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        input:focus {
+            background: #fffef9;
+            border-color: var(--accent-purple);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(155, 107, 158, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Buttons with sketch style */
+        .btn {
+            padding: 15px 18px;
+            width: 100%;
+            border: 1.5px solid var(--ink-dark);
+            font-size: 1.05rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.15s ease;
+            margin-bottom: 12px;
+            font-family: var(--main-font);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            background: var(--paper-white);
+        }
+
+        .btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 2px 2px 0 rgba(42, 42, 42, 0.15);
+        }
+
+        .btn:active {
+            transform: translate(0, 0);
+            box-shadow: 1px 1px 0 rgba(42, 42, 42, 0.1);
+        }
+
+        .btn-primary {
+            color: var(--paper-white);
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            border-color: var(--accent-purple);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #8a5a8d, #c7566f);
+            border-color: #8a5a8d;
+            box-shadow: 2px 2px 0 rgba(155, 107, 158, 0.2);
+        }
+
+        .btn-secondary {
+            color: var(--ink-dark);
+            background: var(--paper-white);
+            border-color: var(--accent-teal);
+        }
+
+        .btn-secondary:hover {
+            background: #f0fdf9;
+            border-color: var(--accent-teal);
+            box-shadow: 2px 2px 0 rgba(90, 158, 142, 0.2);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent-yellow), var(--accent-warm));
+            border-color: var(--accent-yellow);
+            color: var(--ink-dark);
+            font-weight: 800;
+        }
+
+        .btn-accent:hover {
+            background: linear-gradient(135deg, #d9a54a, #b86739);
+            border-color: #d9a54a;
+            box-shadow: 2px 2px 0 rgba(232, 181, 93, 0.3);
+        }
+
+        .row {
+            gap: 12px;
+            display: flex;
+        }
+
+        /* Room code - typewriter style */
+        .room-code {
+            font-size: 2.2rem;
+            letter-spacing: 8px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            padding: 18px;
+            border: 2px dashed var(--accent-pink);
+            background-color: #fef7fa;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .status {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            min-height: 20px;
+            font-weight: 600;
+            font-family: var(--secondary-font);
+        }
+
+        .status.error {
+            color: var(--accent-red);
+        }
+
+        .status.success {
+            color: var(--accent-green);
+        }
+
+        /* Debug log */
+        #debug-log {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background: rgba(42, 42, 42, 0.95);
+            max-height: 150px;
+            padding: 10px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            overflow-y: auto;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            color: #90ee90;
+        }
+
+        body.debug-mode #debug-log {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Game screen */
+        #screen-game {
+            padding-top: 90px;
+            justify-content: flex-start;
+        }
+
+        .hud {
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(250, 248, 243, 0.95) 0%, transparent 100%);
+            z-index: 10;
+            border-bottom: 1px solid var(--border-sketch);
+        }
+
+        .score-card {
+            padding: 10px 20px;
+            text-align: center;
+            border-radius: 6px;
+            background: var(--paper-white);
+            border: 1.5px solid var(--border-sketch);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+            border-radius: 7px;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .score-val {
+            font-weight: 900;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .score-label {
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            color: var(--ink-medium);
+            font-weight: 700;
+            font-family: var(--secondary-font);
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .timer {
+            border: 2px solid transparent;
+            background: linear-gradient(var(--paper-white), var(--paper-white)) padding-box,
+                linear-gradient(135deg, var(--accent-yellow), var(--accent-pink), var(--accent-teal)) border-box;
+            padding: 10px 28px;
+            font-size: 2rem;
+            font-weight: 900;
+            border-radius: 50px;
+            font-variant-numeric: tabular-nums;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Question area */
+        .q-container {
+            padding: 38px;
+            background: var(--paper-white);
+            border: 1px solid var(--border-sketch);
+            border-radius: 8px;
+            max-width: 580px;
+            width: 100%;
+            text-align: center;
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.06),
+                0 8px 24px rgba(0, 0, 0, 0.04);
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .q-container::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, var(--accent-yellow), var(--accent-pink), var(--accent-purple), var(--accent-teal));
+            border-radius: 10px;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .q-container::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid var(--accent-yellow);
+            opacity: 0.5;
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .q-context {
+            margin-bottom: 18px;
+            font-weight: 700;
+            color: var(--ink-medium);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            font-family: var(--secondary-font);
+        }
+
+        .q-text {
+            margin-bottom: 28px;
+            font-size: 2.8rem;
+            line-height: 1.2;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            padding-bottom: 12px;
+        }
+
+        .q-text::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-yellow), var(--accent-pink));
+            border-radius: 2px;
+            opacity: 0.6;
+        }
+
+        .ans-wrapper {
+            position: relative;
+        }
+
+        .ans-input {
+            border-radius: 6px;
+            padding: 18px;
+            font-size: 1.4rem;
+            text-align: center;
+            background: var(--paper-white);
+            border: 1.5px solid var(--border-sketch);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .ans-input:focus {
+            border-color: var(--accent-pink);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(216, 107, 138, 0.15);
+        }
+
+        /* Toasts - hand-drawn style */
+        .toast {
+            font-weight: 900;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            font-size: 4rem;
+            transform: translate(-50%, -50%) scale(0.5) rotate(-8deg);
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            z-index: 50;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .toast.show {
+            transform: translate(-50%, -50%) scale(1) rotate(5deg);
+            opacity: 1;
+        }
+
+        /* Results */
+        .res-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 24px 0;
+        }
+
+        .res-table td {
+            text-align: left;
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-sketch);
+            font-family: var(--secondary-font);
+            font-size: 1rem;
+        }
+
+        .res-table td:last-child {
+            font-weight: 700;
+            text-align: right;
+            font-size: 1.3rem;
+        }
+
+        .res-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .win-msg {
+            font-size: 2.4rem;
+            margin-bottom: 12px;
+            font-weight: 900;
+            color: var(--accent-green);
+            position: relative;
+            display: inline-block;
+        }
+
+        .win-msg::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-green);
+            border-radius: 2px;
+            opacity: 0.25;
+        }
+
+        /* Paper texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @media (max-width: 600px) {
+            .q-text {
+                font-size: 2rem;
+            }
+
+            .timer {
+                padding: 8px 20px;
+                font-size: 1.6rem;
+            }
+
+            .card {
+                padding: 32px 28px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .score-val {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="debug-mode">
+
+    <!-- BACKGROUND -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+    <div id="debug-log"></div>
+
+    <!-- LOBBY SCREEN -->
+    <div id="screen-lobby" class="screen active">
+        <div class="card">
+            <h1>Сөз Сайыс</h1>
+            <h2>Translation Battle</h2>
+
+            <div class="input-group">
+                <label>Your Name</label>
+                <input type="text" id="inp-name" placeholder="Enter your name" maxlength="10">
+            </div>
+
+            <button class="btn btn-primary" onclick="Game.createRoom()">
+                Create Room
+            </button>
+            <button class="btn btn-secondary" onclick="UI.showJoin()">
+                Join Room
+            </button>
+            <div class="row" style="margin-top:20px; border-top:1px solid var(--border-sketch); padding-top:20px;">
+                <button class="btn btn-accent" onclick="Game.startSinglePlayer()">
+                    Single Player (Offline)
+                </button>
+            </div>
+            <div id="status-lobby" class="status"></div>
+        </div>
+    </div>
+
+    <!-- JOIN SCREEN -->
+    <div id="screen-join" class="screen">
+        <div class="card">
+            <h1>Join Room</h1>
+            <div class="input-group">
+                <label>Room Code</label>
+                <input type="text" id="inp-code" placeholder="ABCDE"
+                    style="text-transform:uppercase; text-align:center; font-size:1.5rem; letter-spacing:4px;">
+            </div>
+            <div class="row">
+                <button class="btn btn-secondary" onclick="UI.showLobby()">Back</button>
+                <button class="btn btn-primary" onclick="Game.joinRoom()">Join Game</button>
+            </div>
+            <div id="status-join" class="status"></div>
+        </div>
+    </div>
+
+    <!-- HOST WAITING SCREEN -->
+    <div id="screen-host" class="screen">
+        <div class="card">
+            <h1>Room Ready!</h1>
+            <h2>Share this code:</h2>
+            <div id="host-code" class="room-code">...</div>
+            <p style="color:var(--ink-medium); font-size:0.9rem;">Waiting for opponent...</p>
+            <button class="btn btn-secondary" onclick="location.reload()" style="margin-top:20px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="screen-game" class="screen">
+        <div class="hud">
+            <div class="score-card" style="text-align:left">
+                <div class="score-val" id="score-me"
+                    style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+                <div class="score-label">You</div>
+            </div>
+            <div class="timer" id="timer">90</div>
+            <div class="score-card" style="text-align:right">
+                <div class="score-val" id="score-opp"
+                    style="background: linear-gradient(135deg, var(--accent-yellow), var(--accent-warm)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+                <div class="score-label" id="label-opp">Enemy</div>
+            </div>
+        </div>
+
+        <div class="q-container">
+            <div class="q-context" id="q-ctx">Kazakh → English</div>
+            <div class="q-text" id="q-text">Loading...</div>
+            <div class="ans-wrapper">
+                <input type="text" class="ans-input" id="inp-ans" placeholder="Type translation..." autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="screen-results" class="screen">
+        <div class="card">
+            <div id="res-msg" class="win-msg">Game Over</div>
+            <table class="res-table">
+                <tr>
+                    <td>Your Score</td>
+                    <td id="res-me">0</td>
+                </tr>
+                <tr>
+                    <td>Opponent Score</td>
+                    <td id="res-opp">0</td>
+                </tr>
+            </table>
+            <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <!-- FEEDBACK TOASTS -->
+    <div id="toast-correct" class="toast" style="color:var(--accent-green)">+1</div>
+    <div id="toast-wrong" class="toast" style="color:var(--accent-red)">✗</div>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+# Kazakh Learning Platform — Feature Completion
+
+The student frontend currently points at a Flask/Python backend (`localhost:5000`), but a full PHP+MySQL backend already exists. This plan wires everything together, adds missing features, and documents setup.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The frontend will be switched from the Flask backend to the PHP backend. The Python files ([app.py](file:///c:/Users/serba/my-ap/app.py), [database.py](file:///c:/Users/serba/my-ap/database.py)) will **not** be deleted but will no longer be used. You must have **PHP**, **MySQL/MariaDB**, and a web server (e.g. XAMPP/WAMP/MAMP) installed.
+
+> [!WARNING]
+> The [setup.sql](file:///c:/Users/serba/my-ap/setup.sql) schema will be updated to add a `last_activity_date` column for streak tracking. If you have an existing database, you'll need to re-run the script or manually add the column.
+
+## Proposed Changes
+
+### 1. Student Frontend — Registration
+
+#### [MODIFY] [index.html](file:///c:/Users/serba/my-ap/index.html)
+- Add a registration form below the login form with fields: username, email, password
+- Add a toggle link between login ↔ register views
+- The forms will be shown/hidden via JS (no page reload)
+
+#### [MODIFY] [styles.css](file:///c:/Users/serba/my-ap/styles.css)
+- Add styles for the registration form and toggle link
+
+#### [MODIFY] [app.js](file:///c:/Users/serba/my-ap/app.js)
+- Add [register()](file:///c:/Users/serba/my-ap/app.py#26-57) function
+- Add `showLoginForm()` / `showRegisterForm()` toggle logic
+
+---
+
+### 2. Frontend → PHP API Wiring
+
+#### [MODIFY] [app.js](file:///c:/Users/serba/my-ap/app.js)
+- Change `API_URL` from `http://localhost:5000/api` to relative [api](file:///c:/Users/serba/my-ap/admin/index.html#408-418) path
+- Rewrite all `fetch()` calls to use PHP endpoint URL patterns:
+  - `/api/auth.php?action=login` instead of `/api/login`
+  - `/api/auth.php?action=register` instead of `/api/register`
+  - `/api/auth.php?action=check` instead of `/api/check-session`
+  - `/api/auth.php?action=logout` instead of `/api/logout`
+  - `/api/user.php?action=stats` instead of `/api/user/stats`
+  - `/api/courses.php?action=list` instead of `/api/courses`
+  - `/api/courses.php?action=get&id=X` instead of `/api/courses/X`
+  - `/api/courses.php?action=lesson&id=X` instead of `/api/lessons/X`
+  - `/api/courses.php?action=complete_lesson` instead of `/api/lessons/X/complete`
+  - `/api/words.php?action=learn` instead of `/api/words/learn`
+  - `/api/words.php?action=learned` instead of `/api/words/learned`
+  - `/api/tests.php?action=questions&course_id=X` instead of `/api/courses/X/test`
+  - `/api/tests.php?action=submit` instead of `/api/courses/X/test/submit`
+  - `/api/tests.php?action=grammar` instead of `/api/grammar`
+
+---
+
+### 3. Day Streak Tracking
+
+#### [MODIFY] [setup.sql](file:///c:/Users/serba/my-ap/setup.sql)
+- Add `last_activity_date DATE DEFAULT NULL` column to `users` table
+
+#### [MODIFY] [api/user.php](file:///c:/Users/serba/my-ap/api/user.php)
+- Add `action=update_streak` endpoint that:
+  - Gets user's `last_activity_date` and `streak_days`
+  - If `last_activity_date` is yesterday → increment `streak_days`
+  - If `last_activity_date` is today → no change
+  - Otherwise → reset `streak_days` to 1
+  - Update `last_activity_date` to today
+
+#### [MODIFY] [api/auth.php](file:///c:/Users/serba/my-ap/api/auth.php)
+- After successful login, call streak update logic (inline or via a shared function in [config.php](file:///c:/Users/serba/my-ap/includes/config.php))
+
+#### [MODIFY] [includes/config.php](file:///c:/Users/serba/my-ap/includes/config.php)
+- Add `updateStreak($userId)` helper function to centralize streak logic
+
+#### [MODIFY] [api/courses.php](file:///c:/Users/serba/my-ap/api/courses.php)
+- Call `updateStreak()` when a lesson is completed
+
+#### [MODIFY] [api/words.php](file:///c:/Users/serba/my-ap/api/words.php)
+- Call `updateStreak()` when a word is learned
+
+---
+
+### 4. Test Question Management (Admin Panel)
+
+#### [MODIFY] [admin/index.html](file:///c:/Users/serba/my-ap/admin/index.html)
+- Add a sidebar nav item: "Add Test Question"
+- Add a sidebar nav item: "View Tests"
+- Add "Add Test Question" page with form fields:
+  - Course dropdown, Question text (EN/KK/RU), Question type (multiple_choice), Correct answer, 4 option inputs, Points
+- Add "View Test Questions" page with course dropdown filter and questions table
+
+#### [MODIFY] [api/tests.php](file:///c:/Users/serba/my-ap/api/tests.php)
+- Add `action=add_question` endpoint (POST) to insert a new test question
+- Add `action=list_questions` endpoint (GET) with optional `course_id` filter
+
+---
+
+### 5. Setup Instructions
+
+#### [NEW] [SETUP.md](file:///c:/Users/serba/my-ap/SETUP.md)
+- Prerequisites: XAMPP/WAMP/MAMP with PHP 7.4+ and MySQL 5.7+
+- Step-by-step: create database, import [setup.sql](file:///c:/Users/serba/my-ap/setup.sql), edit [includes/config.php](file:///c:/Users/serba/my-ap/includes/config.php) credentials
+- Place project in `htdocs` folder
+- Access the app and admin panel
+- Default credentials
+
+## Verification Plan
+
+### Manual Verification (Browser Testing)
+1. **Setup**: Place the project in XAMPP `htdocs`, start Apache & MySQL, import [setup.sql](file:///c:/Users/serba/my-ap/setup.sql)
+2. **Registration**: Open [index.html](file:///c:/Users/serba/my-ap/index.html), toggle to "Register", create a new account → should auto-login
+3. **Login**: Logout, then login with the new account → dashboard should show stats
+4. **Courses**: Navigate to Courses tab → should list all courses from the database
+5. **Lesson & Words**: Click a course → see lessons → click a lesson → see vocabulary → mark word as learned
+6. **Tests**: From course detail, click "Take Test" → answer multiple choice → submit → see score
+7. **Streak**: Login on day 1, do an activity. Login next day → streak should be 2
+8. **Admin Panel**: Open [admin/index.html](file:///c:/Users/serba/my-ap/admin/index.html), login, add a test question, view it in the list
+9. **Admin — Add Course/Word**: Add a course, add a lesson, add a word via admin → verify in student frontend

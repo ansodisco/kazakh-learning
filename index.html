@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kazakh Learning Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Noto+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <div id="login-screen">
+        <div class="login-card">
+            <h1 class="login-title">Қазақша</h1>
+            <p class="login-subtitle">Learn Kazakh Language</p>
+
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <div id="login-error" class="error-message"></div>
+            </form>
+
+            <!-- Register Form (hidden by default) -->
+            <form id="register-form" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="register-username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password <span style="font-weight:400;color:var(--ink-light)">(min 6
+                            chars)</span></label>
+                    <input type="password" class="form-input" id="register-password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+                <div id="register-error" class="error-message"></div>
+                <div id="register-success" class="success-message" style="display:none;"></div>
+            </form>
+
+            <p class="auth-toggle" id="toggle-to-register"
+                style="text-align: center; margin-top: 20px; color: var(--ink-light); font-size: 0.85rem;">
+                Don't have an account? <a href="#" onclick="showRegisterForm(); return false;"
+                    style="color: var(--accent-purple); font-weight: 600;">Register here</a>
+            </p>
+            <p class="auth-toggle" id="toggle-to-login"
+                style="display: none; text-align: center; margin-top: 20px; color: var(--ink-light); font-size: 0.85rem;">
+                Already have an account? <a href="#" onclick="showLoginForm(); return false;"
+                    style="color: var(--accent-purple); font-weight: 600;">Sign in</a>
+            </p>
+
+            <p id="demo-hint"
+                style="text-align: center; margin-top: 10px; color: var(--ink-light); font-size: 0.85rem;">
+                Demo: Student123 / password123
+            </p>
+        </div>
+    </div>
+
+    <div id="app">
+        <div class="app-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-top">
+                    <a href="#" class="sidebar-logo-link">
+                        <div class="sidebar-logo-shape"></div>
+                        <span class="sidebar-logo-text">Қазақша</span>
+                    </a>
+
+                    <nav class="sidebar-nav">
+                        <div class="sidebar-link active" onclick="showTab('dashboard')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="14" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                            </svg>
+                            <span class="sidebar-link-text">Dashboard</span>
+                        </div>
+                        <div class="sidebar-link" onclick="showTab('courses')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                            </svg>
+                            <span class="sidebar-link-text">Courses</span>
+                        </div>
+                        <div class="sidebar-link" onclick="showTab('grammar')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10 9 9 9 8 9" />
+                            </svg>
+                            <span class="sidebar-link-text">Grammar</span>
+                        </div>
+                        <div class="sidebar-link" onclick="showTab('words')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                            <span class="sidebar-link-text">My Words</span>
+                        </div>
+                        <a href="i.html" class="sidebar-link" style="text-decoration:none;color:inherit;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <rect x="2" y="6" width="20" height="12" rx="3" />
+                                <circle cx="9" cy="12" r="1.5" />
+                                <circle cx="15" cy="10" r="1" />
+                                <circle cx="17" cy="12" r="1" />
+                                <circle cx="15" cy="14" r="1" />
+                                <circle cx="13" cy="12" r="1" />
+                                <line x1="7" y1="10" x2="7" y2="14" />
+                                <line x1="5" y1="12" x2="9" y2="12" />
+                            </svg>
+                            <span class="sidebar-link-text">Name Game</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="lang-switcher">
+                        <button class="lang-btn active" onclick="switchLanguage('en')">EN</button>
+                        <button class="lang-btn" onclick="switchLanguage('kk')">ҚАЗ</button>
+                        <button class="lang-btn" onclick="switchLanguage('ru')">РУС</button>
+                    </div>
+
+                    <div class="sidebar-link user-link">
+                        <div class="user-avatar" id="user-avatar">S</div>
+                        <span class="sidebar-link-text" id="username-display">Student</span>
+                    </div>
+
+                    <div class="sidebar-link logout-link" onclick="logout()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span class="sidebar-link-text">Logout</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="container">
+                    <div id="dashboard" class="tab-content active">
+                        <div class="progress-circle-container">
+                            <div class="progress-circle">
+                                <svg class="progress-ring" width="250" height="250">
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#9b6b9e;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#d86b8a;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="125" cy="125" r="110" fill="none" stroke="#d4d0c8" stroke-width="12">
+                                    </circle>
+                                    <circle id="progress-ring-fill" cx="125" cy="125" r="110" fill="none"
+                                        stroke="url(#gradient)" stroke-width="12" stroke-linecap="round"
+                                        stroke-dasharray="691" stroke-dashoffset="691"></circle>
+                                </svg>
+                                <div class="progress-text">
+                                    <div class="progress-percent" id="overall-progress">0%</div>
+                                    <div class="progress-label">Overall Progress</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="stat-courses">0</div>
+                                <div class="stat-label">Courses Completed</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="stat-words">0</div>
+                                <div class="stat-label">Words Learned</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="stat-trophies">0</div>
+                                <div class="stat-label">Trophies Earned</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="stat-streak">0</div>
+                                <div class="stat-label">Day Streak</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="courses" class="tab-content">
+                        <h1 style="margin-bottom: 30px; font-weight: 900;">Available Courses</h1>
+                        <div id="courses-list" class="course-grid">
+                            <div class="loading">Loading courses...</div>
+                        </div>
+                    </div>
+
+                    <div id="course-detail" class="tab-content">
+                        <button class="back-btn" onclick="showTab('courses')">← Back to Courses</button>
+                        <div id="course-detail-content"></div>
+                    </div>
+
+                    <div id="lesson-view" class="tab-content">
+                        <button class="back-btn" onclick="backToCourseDetail()">← Back to Course</button>
+                        <div id="lesson-content"></div>
+                    </div>
+
+                    <div id="grammar" class="tab-content">
+                        <h1 style="margin-bottom: 30px; font-weight: 900;">Grammar Rules</h1>
+                        <div id="grammar-list">
+                            <div class="loading">Loading grammar rules...</div>
+                        </div>
+                    </div>
+
+                    <div id="words" class="tab-content">
+                        <h1 style="margin-bottom: 30px; font-weight: 900;">My Learned Words</h1>
+                        <div id="words-list">
+                            <div class="loading">Loading your words...</div>
+                        </div>
+                    </div>
+
+                    <div id="test-view" class="tab-content">
+                        <button class="back-btn" onclick="backToCourseDetail()">← Back to Course</button>
+                        <div id="test-content"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Override showTab to update sidebar active state
+        const originalShowTab = window.showTab;
+        window.showTab = function (tabName) {
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            const tabToLinkMap = {
+                'dashboard': 0,
+                'courses': 1,
+                'grammar': 2,
+                'words': 3
+            };
+
+            const linkIndex = tabToLinkMap[tabName];
+            if (linkIndex !== undefined) {
+                const links = document.querySelectorAll('.sidebar-nav .sidebar-link');
+                if (links[linkIndex]) {
+                    links[linkIndex].classList.add('active');
+                }
+            }
+
+            // Call original function if it exists
+            if (typeof originalShowTab === 'function') {
+                originalShowTab(tabName);
+            } else {
+                // Default tab switching
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                const targetTab = document.getElementById(tabName);
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                }
+            }
+        };
+    </script>
+</body>
+
+</html>
